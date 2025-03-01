@@ -1,34 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { LoginUserDto, CreateUserDto } from './dto';
+import { BaseController } from 'src/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+export class AuthController extends BaseController {
+  constructor(private readonly authService: AuthService) {
+    super();
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('signup')
+  async signUp(@Body() form: CreateUserDto) {
+    const user = await this.authService.signUp(form)
+
+    if (user.isError) throw user.error;
+
+    return this.response({
+      message: 'Account Created',
+      data: user.data,
+    });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @UseGuards(AuthGuard('local'))
+  @Post('login')
+  async login(@Body() form: LoginUserDto) {
+    const user = await this.authService.login(form);
+
+    if (user.isError) throw user.error;
+
+    return this.response({
+      message: 'Login Successful',
+      data: user.data,
+    });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post('logout')
+  // async logout() {
+  //   const user = await this.authService.logout();
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+  //   if (user.isError) throw user.error;
+
+  //   return this.response({
+  //     message: 'Login Successful',
+  //     data: user.data,
+  //   });
+  // }
 }
