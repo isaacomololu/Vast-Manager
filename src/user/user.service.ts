@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto';
+// import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { DatabaseProvider } from 'src/database/database.provider';
@@ -30,29 +30,29 @@ export class UserService extends BaseService {
     return this.Results(user);
   }
 
-  async updateUser(id: string, payload: UpdateUserDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { id }
-    });
+  // async updateUser(id: string, payload: UpdateUserDto) {
+  //   const user = await this.prisma.user.findUnique({
+  //     where: { id }
+  //   });
 
-    if (!user) {
-      return this.HandleError(
-        new NotFoundException('User not found')
-      )
-    };
+  //   if (!user) {
+  //     return this.HandleError(
+  //       new NotFoundException('User not found')
+  //     )
+  //   };
 
-    const updatedUser = await this.prisma.user.update({
-      where: { id },
-      data: {
-        ...payload,
-        ...(payload.password && {
-          password: await hash(payload.password, 10)
-        }),
-      }
-    })
+  //   const updatedUser = await this.prisma.user.update({
+  //     where: { id },
+  //     data: {
+  //       ...payload,
+  //       ...(payload.password && {
+  //         password: await hash(payload.password, 10)
+  //       }),
+  //     }
+  //   })
 
-    return this.Results(updatedUser);
-  }
+  //   return this.Results(updatedUser);
+  // }
 
   async deleteUser(id: string) {
     const user = await this.prisma.user.findUnique({

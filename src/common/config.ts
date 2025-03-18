@@ -25,6 +25,42 @@ class Config {
     @IsNotEmpty()
     @IsString()
     NODE_ENV: string;
+
+    // @IsNotEmpty()
+    // @IsString()
+    // EMAIL_RESET_PASSWORD_URL: string;
+
+    // @IsNotEmpty()
+    // @IsString()
+    // EMAIL_USER: string;
+
+    // @IsNotEmpty()
+    // @IsString()
+    // EMAIL_PASSWORD: string;
+
+    // @IsNotEmpty()
+    // @IsString()
+    // JWT_VERIFICATION_TOKEN_SECRET: string;
+
+    // @IsNotEmpty()
+    // @IsString()
+    // MAIL_USERNAME: string;
+
+    // @IsNotEmpty()
+    // @IsString()
+    // MAIL_PASSWORD: string;
+
+    @IsNotEmpty()
+    @IsString()
+    OAUTH_CLIENTID: string;
+
+    @IsNotEmpty()
+    @IsString()
+    OAUTH_CLIENT_SECRET: string;
+
+    @IsNotEmpty()
+    @IsString()
+    OAUTH_REFRESH_TOKEN: string;
 }
 
 export let config: Config;

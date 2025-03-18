@@ -10,13 +10,21 @@ import { JwtStrategy } from 'src/common/strategies/jwt.strategy';
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      // secret: config.JWT_SECRET,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
-    }),
+    // JwtModule.register({
+    //   // secret: config.JWT_SECRET,
+    // secret: process.env.JWT_SECRET,
+    // signOptions: { expiresIn: '1h' },
+    // }),
+    // JwtModule.registerAsync({
+    //   useFactory: () => ({
+    //     secret: config.JWT_SECRET,
+    //     signOptions: { expiresIn: '1h' },
+    //   }),
+    //   global: true
+    // })
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],
+
 })
 export class AuthModule { }

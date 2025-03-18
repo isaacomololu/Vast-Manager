@@ -7,9 +7,10 @@ import {
 import { BaseService } from 'src/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseProvider } from 'src/database/database.provider';
-import { LoginUserDto, CreateUserDto } from './dto';
+import { LoginDto, SignUp, ChangePasswordDto, RefreshTokenDto } from './dto';
 import { compare, hash } from 'bcrypt';
 import { JWTPayload } from './auth.interface';
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Injectable()
@@ -23,7 +24,11 @@ export class AuthService extends BaseService {
 
   async signJWT(payload: any) {
     const accessToken = this.jwtService.sign(payload);
-    return this.Results(accessToken);
+    const refreshToken = uuidv4();
+
+    await this.storeRefreshToken(refreshToken, payload.userId);
+
+    return this.Results({ accessToken, refreshToken });
   }
 
   async verifyJWT(jwt: string) {
@@ -45,7 +50,7 @@ export class AuthService extends BaseService {
     }
   }
 
-  async signUp(payload: CreateUserDto) {
+  async signUp(payload: SignUp) {
     const existingUser = await this.prisma.user.findFirst({
       where:
         { email: payload.email }
@@ -72,23 +77,24 @@ export class AuthService extends BaseService {
     }
 
     const { data: accessToken } = await this.signJWT(jwtPayload);
+
     return this.Results({ user: newUser, accessToken });
   }
 
-  async login(payload: LoginUserDto) {
+  async login(payload: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: payload.email }
     });
 
     if (!user) {
       return this.HandleError(
-        new NotFoundException('User with this email not found')
+        new UnauthorizedException('Incorrect Credentials')
       );
     }
 
     if (!(await compare(payload.password, user.password))) {
       return this.HandleError(
-        new UnauthorizedException('Invalid Credentials')
+        new UnauthorizedException('Incorrect Credentials')
       )
     }
 
@@ -100,6 +106,42 @@ export class AuthService extends BaseService {
 
     const { data: accessToken } = await this.signJWT(jwtPayload);
     return this.Results({ user, accessToken });
+  }
+
+  async refreshTokens(payload: RefreshTokenDto) {
+    const { token } = payload;
+
+    const refreshToken = await this.prisma.refreshToken.findFirst({
+      where: {
+        token,
+        expiryDate: { gte: new Date() }
+      }
+    });
+
+    if (!refreshToken) {
+      return this.HandleError(
+        new UnauthorizedException('Invalid Refresh Token')
+      );
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: { id: refreshToken.userId }
+    });
+
+    if (!user) {
+      return this.HandleError(
+        new UnauthorizedException('User not found')
+      );
+    }
+
+    const jwtPayload: JWTPayload = {
+      email: user.email,
+      lastLoggedInAt: new Date().toISOString(),
+      userId: user.id,
+    }
+    const newToken = await this.signJWT(jwtPayload);
+
+    return this.Results(newToken);
   }
 
   // async validateUser(email: string, password: string) {
@@ -146,5 +188,23 @@ export class AuthService extends BaseService {
     } catch (error) {
       return this.HandleError(error);
     }
+  }
+
+  async storeRefreshToken(token: string, userId: string) {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 3);
+
+    await this.prisma.refreshToken.upsert({
+      where: { userId },
+      update: {
+        token,
+        expiryDate
+      },
+      create: {
+        token,
+        userId,
+        expiryDate
+      }
+    });
   }
 }

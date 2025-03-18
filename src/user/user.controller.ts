@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { BaseController } from 'src/common';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { Request } from 'express';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { User } from 'src/common/interfaces';
 
+@UseGuards(AuthGuard)
+@ApiBearerAuth('jwt')
 @Controller('user')
 export class UserController extends BaseController {
   constructor(private readonly userService: UserService) {
@@ -22,29 +26,33 @@ export class UserController extends BaseController {
     });
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const user = await this.userService.findOne(id);
+  @Get('one')
+  async findOne(@Req() request: Request) {
+    console.log('controller user', request.user);
 
-    if (user.isError) throw user.error;
+    const user = request.user as User;
+    return this.userService.findOne(user.userId);
 
-    return this.response({
-      message: 'Account Retrived',
-      data: user.data,
-    })
+
+    // if (user.isError) throw user.error;
+
+    // return this.response({
+    //   message: 'Account Retrived',
+    //   data: user.data,
+    // })
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() form: UpdateUserDto) {
-    const user = await this.userService.updateUser(id, form);
+  // @Patch(':id')
+  // async update(@Param('id') id: string, @Body() form: UpdateUserDto) {
+  //   const user = await this.userService.updateUser(id, form);
 
-    if (user.isError) throw user.error;
+  //   if (user.isError) throw user.error;
 
-    return this.response({
-      message: 'Account Updated',
-      data: user.data,
-    })
-  }
+  //   return this.response({
+  //     message: 'Account Updated',
+  //     data: user.data,
+  //   })
+  // }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
