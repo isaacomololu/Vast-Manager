@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { BaseController } from 'src/common';
-import { AuthGuard } from 'src/common/guards/auth.guard';
+import { AuthGuard } from 'src/common/';
 import { Request } from 'express';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from 'src/common/interfaces';

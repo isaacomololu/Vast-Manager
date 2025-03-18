@@ -42,13 +42,13 @@ class Config {
     // @IsString()
     // JWT_VERIFICATION_TOKEN_SECRET: string;
 
-    // @IsNotEmpty()
-    // @IsString()
-    // MAIL_USERNAME: string;
+    @IsNotEmpty()
+    @IsString()
+    MAIL_USERNAME: string;
 
-    // @IsNotEmpty()
-    // @IsString()
-    // MAIL_PASSWORD: string;
+    @IsNotEmpty()
+    @IsString()
+    MAIL_PASSWORD: string;
 
     @IsNotEmpty()
     @IsString()
@@ -61,6 +61,10 @@ class Config {
     @IsNotEmpty()
     @IsString()
     OAUTH_REFRESH_TOKEN: string;
+
+    @IsNotEmpty()
+    @IsString()
+    FRONTEND_URL: string;
 }
 
 export let config: Config;

@@ -29,3 +29,10 @@ model RefreshToken {
   expiryDate DateTime
   createdAt  DateTime @default(now())
 }
+
+model ResetToken {
+  token      String   @unique
+  userId     String   @unique
+  expiryDate DateTime
+  createdAt  DateTime @default(now())
+}

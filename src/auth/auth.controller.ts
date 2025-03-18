@@ -1,9 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, SignUp, ChangePasswordDto, RefreshTokenDto } from './dto';
-import { BaseController } from 'src/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  LoginDto,
+  SignUp,
+  ChangePasswordDto,
+  RefreshTokenDto,
+  ForgotPasswordDto,
+  ResetPasswordDto
+} from './dto';
+import { BaseController, AuthGuard } from 'src/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,7 +30,7 @@ export class AuthController extends BaseController {
     });
   }
 
-  @UseGuards(AuthGuard('local'))
+  // @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Body() form: LoginDto) {
     const user = await this.authService.login(form);
@@ -49,37 +55,48 @@ export class AuthController extends BaseController {
     });
   }
 
-  // @Post('forgot-password')
-  // async forgotPassword(@Body() { email }: { email: string }) {
-  //   // const forgot = await this.authService.forgotPassword(email);
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Put('change-password')
+  async changePassword(
+    @Req() request,
+    @Body() form: ChangePasswordDto
+  ) {
+    const password = await this.authService.changePassword(request.user.userId, form);
 
-  //   // return this.response({
-  //   //   message: 'Password Reset Link Sent',
-  //   //   // data: forgot.data,
-  //   // });
-  // }
+    if (password.isError) throw password.error;
+    return this.response({
+      message: 'Password Changed',
+      data: password.data,
+    });
+  }
 
+  // @ApiBearerAuth('jwt')
   // @UseGuards(AuthGuard)
-  // @Put('change-password')
-  // async changePassword(@Body() form: ChangePasswordDto) {
-  //   // const pass = this.authService.changePassword(form);
+  @Post('forgot-password')
+  async forgotPassword(
+    @Req() request,
+    @Body() form: ForgotPasswordDto
+  ) {
+    const data = await this.authService.forgotPassword(form);
 
-  //   // if (pass.isError) throw pass.error;
-  //   // return this.response({
-  //   //   message: 'Password Changed',
-  //   //   data: pass.data,
-  //   // });
-  // }
-  // @UseGuards(AuthGuard('jwt'))
-  // @Post('logout')
-  // async logout() {
-  //   const user = await this.authService.logout();
+    if (data.isError) throw data.error;
+    return this.response({
+      message: 'Password Reset Email Sent',
+      data: data.data,
+    });
+  }
 
-  //   if (user.isError) throw user.error;
+  @Put('reset-password')
+  async resetPassword(
+    @Body() form: ResetPasswordDto
+  ) {
+    const password = await this.authService.resetPassword(form);
+    if (password.isError) throw password.error;
 
-  //   return this.response({
-  //     message: 'Login Successful',
-  //     data: user.data,
-  //   });
-  // }
+    return this.response({
+      message: 'Password Changed',
+      data: password.data,
+    });
+  }
 }
