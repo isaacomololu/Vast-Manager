@@ -14,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid(4))
+  id        String    @id @default(uuid(4))
   firstName String
   lastName  String
   password  String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Meeting   Meeting[]
 }
 
 model RefreshToken {
@@ -35,4 +36,30 @@ model ResetToken {
   userId     String   @unique
   expiryDate DateTime
   createdAt  DateTime @default(now())
+}
+
+model Meeting {
+  id          String   @id @default(uuid(4))
+  title       String
+  description String?
+  timezone    String
+  // startTime   DateTime
+  // endTime     DateTime?
+  time        DateTime
+  duration    Int
+  status      Status   @default(UPCOMING)
+  isRecurring Boolean  @default(false)
+  location    String?
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+enum Status {
+  UPCOMING
+  TODAY
+  COMPLETED
+  CANCELLED
 }

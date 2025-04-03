@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { EmailModule } from './common/email/email.module';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'src/common';
+import { MeetingsModule } from './meetings/meetings.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { config } from 'src/common';
         signOptions: { expiresIn: '1h' },
       }),
       global: true
-    })
+    }),
+    MeetingsModule
   ],
 })
 export class AppModule { }
