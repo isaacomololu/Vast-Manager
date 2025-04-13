@@ -54,9 +54,11 @@ export class AuthService extends BaseService {
   }
 
   async signUp(payload: SignUp) {
+    const { firstName, lastName, email, password, avatar } = payload;
+
     const existingUser = await this.prisma.user.findFirst({
       where:
-        { email: payload.email }
+        { email }
     })
     if (existingUser) {
       return this.HandleError(
@@ -66,10 +68,11 @@ export class AuthService extends BaseService {
 
     const newUser = await this.prisma.user.create({
       data: {
-        email: payload.email,
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        password: await hash(payload.password, 10),
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        password: await hash(password, 10),
+        avatar
       }
     });
 

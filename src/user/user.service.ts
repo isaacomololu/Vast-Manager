@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { DatabaseProvider } from 'src/database/database.provider';
 import { BaseService } from 'src/common';
+import { ChangeNameDto } from './dto';
 
 @Injectable()
 export class UserService extends BaseService {
@@ -30,29 +31,29 @@ export class UserService extends BaseService {
     return this.Results(user);
   }
 
-  // async updateUser(id: string, payload: UpdateUserDto) {
-  //   const user = await this.prisma.user.findUnique({
-  //     where: { id }
-  //   });
+  async changeName(id: string, payload: ChangeNameDto) {
+    const { firstName, lastName } = payload;
 
-  //   if (!user) {
-  //     return this.HandleError(
-  //       new NotFoundException('User not found')
-  //     )
-  //   };
+    const user = await this.prisma.user.findUnique({
+      where: { id }
+    });
 
-  //   const updatedUser = await this.prisma.user.update({
-  //     where: { id },
-  //     data: {
-  //       ...payload,
-  //       ...(payload.password && {
-  //         password: await hash(payload.password, 10)
-  //       }),
-  //     }
-  //   })
+    if (!user) {
+      return this.HandleError(
+        new NotFoundException('User not found')
+      )
+    };
 
-  //   return this.Results(updatedUser);
-  // }
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        firstName,
+        lastName
+      }
+    })
+
+    return this.Results(updatedUser);
+  }
 
   async deleteUser(id: string) {
     const user = await this.prisma.user.findUnique({

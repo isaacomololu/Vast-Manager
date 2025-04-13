@@ -5,6 +5,7 @@ import { AuthGuard } from 'src/common/';
 import { Request } from 'express';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from 'src/common/interfaces';
+import { ChangeNameDto } from './dto';
 
 @UseGuards(AuthGuard)
 @ApiBearerAuth('jwt')
@@ -42,17 +43,17 @@ export class UserController extends BaseController {
     // })
   }
 
-  // @Patch(':id')
-  // async update(@Param('id') id: string, @Body() form: UpdateUserDto) {
-  //   const user = await this.userService.updateUser(id, form);
+  @Patch(':id')
+  async changeName(@Param('id') id: string, @Body() form: ChangeNameDto) {
+    const user = await this.userService.changeName(id, form);
 
-  //   if (user.isError) throw user.error;
+    if (user.isError) throw user.error;
 
-  //   return this.response({
-  //     message: 'Account Updated',
-  //     data: user.data,
-  //   })
-  // }
+    return this.response({
+      message: 'Names Updated',
+      data: user.data,
+    })
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {

@@ -4,7 +4,8 @@ import { MeetingsService } from './meetings.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from 'src/common/interfaces';
-import { CreateMeetingDto, GetAllMeetingsDto, UpdateMeetingDto } from './dtos';
+import { CreateMeetingDto, GetAllMeetingsDto, SetStatusDto, UpdateMeetingDto } from './dtos';
+import { Status } from '@prisma/client';
 
 @ApiBearerAuth('jwt')
 @UseGuards(AuthGuard)
@@ -16,9 +17,15 @@ export class MeetingsController extends BaseController {
 
     @Get('')
     async getAllMeetings(@Query() query: GetAllMeetingsDto) {
-        const { pageSize, page, ...rest } = query;
+        const { pageSize, page, status, ...rest } = query;
 
-        const meetings = await this.meetingsService.getAllMeetings();
+        // const statusEnum = status ? status as Status : undefined;
+
+        const meetings = await this.meetingsService.getAllMeetings(
+            rest,
+            status,
+            { pageSize: pageSize || 10, page: page || 1 }
+        );
         if (meetings.isError) return meetings.error;
 
         return this.response({
@@ -101,6 +108,37 @@ export class MeetingsController extends BaseController {
 
         return this.response({
             message: 'Meeting deleted successfully',
+            data: meeting.data,
+        })
+    }
+
+    @Patch('status:id')
+    async userSetMeetingStatus(
+        @Req() request: Request,
+        @Param('id') id: string,
+        @Body() form: SetStatusDto
+    ) {
+        const user = request.user as User;
+        const meeting = await this.meetingsService.userSetMeetingStatus(
+            user?.userId,
+            id,
+            form
+        );
+        if (meeting.isError) return meeting.error;
+
+        return this.response({
+            message: 'Meeting status updated successfully',
+            data: meeting.data,
+        })
+    }
+
+    @Patch('status')
+    async setMeetingStatus() {
+        const meeting = await this.meetingsService.setMeetingStatus();
+        if (meeting.isError) return meeting.error;
+
+        return this.response({
+            message: 'Meeting status updated successfully',
             data: meeting.data,
         })
     }
