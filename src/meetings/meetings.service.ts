@@ -1,15 +1,16 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { BaseService } from 'src/common';
 import { DatabaseProvider } from 'src/database/database.provider';
 import { CreateMeetingDto, SetStatusDto, UpdateMeetingDto } from './dtos';
 import { Status } from '@prisma/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
-
+import { NotificationGateway } from 'src/notification/notification.gateway';
 
 @Injectable()
 export class MeetingsService extends BaseService {
     constructor(
         private readonly prisma: DatabaseProvider,
+        private readonly notificationGateway: NotificationGateway
     ) {
         super();
     }
@@ -105,17 +106,43 @@ export class MeetingsService extends BaseService {
         console.log('duration', duration);
         const meetingDate = new Date(date);
 
-        const meeting = await this.prisma.meeting.create({
-            data: {
-                title,
-                description,
-                startTime: setStartTime,
-                endTime,
-                date: meetingDate,
-                ...createDetails,
-                userId,
-            },
-        });
+        const today = new Date();
+        let meeting;
+
+        if (meetingDate < today) {
+            return this.HandleError(new BadRequestException('Meeting date cannot be in the past'));
+        }
+
+        if (meetingDate === today) {
+            meeting = await this.prisma.meeting.create({
+                data: {
+                    title,
+                    description,
+                    startTime: setStartTime,
+                    endTime,
+                    date: today,
+                    ...createDetails,
+                    userId,
+                },
+            });
+
+            this.notificationGateway.sendNotification(null, {
+                message: `You have a meeting today: ${title} at ${setStartTime}`,
+                meetingId: meeting.id,
+            });
+        } else {
+            meeting = await this.prisma.meeting.create({
+                data: {
+                    title,
+                    description,
+                    startTime: setStartTime,
+                    endTime,
+                    date: meetingDate,
+                    ...createDetails,
+                    userId,
+                },
+            });
+        }
 
         return this.Results(meeting);
     }
@@ -282,6 +309,46 @@ export class MeetingsService extends BaseService {
                 status: Status.COMPLETED
             }
         });
+
+        const notifyMeetingsToday = await this.prisma.meeting.findMany({
+            where: {
+                startTime: {
+                    gte: today,
+                    lt: tomorrow,
+                },
+                status: Status.TODAY
+            }
+        });
+
+        for (const meeting of notifyMeetingsToday) {
+            this.notificationGateway.sendNotification(null, {
+                message: `You have a meeting today: ${meeting.title} at ${meeting.startTime}`,
+                meetingId: meeting.id,
+            });
+        }
+
+        const notifyMeetingsCompleted = await this.prisma.meeting.findMany({
+            where: {
+                date: {
+                    lt: today
+                },
+                status: Status.COMPLETED
+            }
+        })
+        const length = notifyMeetingsCompleted.length;
+
+        for (const meeting of notifyMeetingsToday) {
+            this.notificationGateway.sendNotification(null, {
+                message: `You have completed ${meeting.title}`,
+                meetingId: meeting.id,
+            });
+        }
+
+        if (notifyMeetingsCompleted) {
+            this.notificationGateway.sendNotification(null, {
+                message: `You have completed ${length} meetings today`,
+            });
+        }
 
         return this.Results({
             updatedMeetings,

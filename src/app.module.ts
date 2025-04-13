@@ -6,6 +6,7 @@ import { EmailModule } from './common/email/email.module';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'src/common';
 import { MeetingsModule } from './meetings/meetings.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { MeetingsModule } from './meetings/meetings.module';
       }),
       global: true
     }),
-    MeetingsModule
+    MeetingsModule,
+    NotificationModule
   ],
 })
 export class AppModule { }
