@@ -28,11 +28,11 @@ export class UserController extends BaseController {
   }
 
   @Get('one')
-  async findOne(@Req() request: Request) {
+  async getUserProfile(@Req() request: Request) {
     console.log('controller user', request.user);
 
     const user = request.user as User;
-    return this.userService.findOne(user.userId);
+    return this.userService.getUserProfile(user.userId);
 
 
     // if (user.isError) throw user.error;

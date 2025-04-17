@@ -1,4 +1,4 @@
-<p align="center">
+<!-- <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
@@ -18,11 +18,11 @@
   <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
     <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
   <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
+</p> -->
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+<!-- ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
@@ -96,4 +96,73 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE). -->
+
+
+Vast Manager API
+
+## Description
+Welcome to Vast Manager! This is a scheduling application built with TypeScript and the NestJS framework. It allows users to set reminders for meetings, appointments, and other important events. The application provides a robust backend API for managing user schedules efficiently. 
+
+## Features
+User authentication (signup, login)
+Meeting/appointment scheduling
+Status tracking (UPCOMING, TODAY, COMPLETED, CANCELLED)
+Email notifications
+Real-time updates
+JWT-based authentication
+
+Installation
+```bash
+$ yarn install
+```
+
+## Environment Setup
+DATABASE_URL=your_database_connection_string
+JWT_SECRET=your_jwt_secret
+EMAIL_HOST=your_email_host
+EMAIL_USER=your_email_user
+EMAIL_PASSWORD=your_email_password
+
+## Running the Application
+```bash
+$ yarn start:dev
+
+# watch mode
+$ yarn start:dev
+
+# production mode
+$ yarn start:prod
+```
+
+## Database Setup
+This project uses Prisma ORM with PostgreSQL as database. To set up the database, follow these steps:
+```bash
+#Generate Prisma Client
+$ npx prisma generate
+
+# Run migrations
+$ npx prisma migrate dev
+
+# Update Prisma schema
+$ npx prisma db push
+```
+
+## API Endpoints
+Authentication
+  -POST /auth/signup - Register a new user
+  -POST /auth/login - Login existing user
+  -POST /auth/refresh - Refresh access token
+Meetings
+  -GET /meetings - Get all meetings
+  -POST /meetings - Create a new meeting
+  -GET /meetings/:id - Get meeting details
+  -PATCH /meetings/:id - Update meeting
+  -DELETE /meetings/:id - Delete meeting
+User
+  -GET /users - Get all users
+  -GET /users/:id - Get user details
+
+## Contact
+Developer: Isaac Omololu
+Project Link: https://github.com/isaacomololu/Vast-Manager
